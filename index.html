@@ -1,0 +1,933 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ZINN · 刘紫茵</title>
+  <style>
+    /* ===== RESET & BASE ===== */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --black: #0a0a0a;
+      --white: #ffffff;
+      --gray-light: #f5f5f5;
+      --gray-mid: #888888;
+      --gray-border: #d8d8d8;
+      --font-sans: 'Inter', 'Helvetica Neue', Arial, 'PingFang SC', 'Hiragino Sans GB', sans-serif;
+      --font-mono: 'JetBrains Mono', 'Courier New', monospace;
+      --sidebar-w: 280px;
+      --header-h: 140px;
+    }
+
+    html { font-size: 15px; }
+
+    body {
+      background: var(--white);
+      color: var(--black);
+      font-family: var(--font-sans);
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    a { color: inherit; text-decoration: none; }
+    button { border: none; background: none; cursor: pointer; font-family: inherit; }
+
+    /* ===== HEADER ===== */
+    .site-header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: var(--white);
+      border-bottom: 1px solid var(--black);
+      padding: 28px 40px 20px;
+    }
+
+    .header-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      margin-bottom: 14px;
+    }
+
+    .site-name {
+      font-size: 1.35rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      line-height: 1.2;
+    }
+
+    .site-name span {
+      display: block;
+      font-size: 0.78rem;
+      font-weight: 400;
+      color: var(--gray-mid);
+      letter-spacing: 0.05em;
+      margin-top: 2px;
+    }
+
+    .lang-toggle {
+      font-size: 0.75rem;
+      letter-spacing: 0.08em;
+      color: var(--gray-mid);
+      padding: 4px 10px;
+      border: 1px solid var(--gray-border);
+      transition: all 0.15s;
+      cursor: pointer;
+    }
+    .lang-toggle:hover {
+      background: var(--black);
+      color: var(--white);
+      border-color: var(--black);
+    }
+
+    /* Identity tags */
+    .identity-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .tag {
+      display: inline-block;
+      background: var(--black);
+      color: var(--white);
+      font-size: 0.72rem;
+      font-weight: 500;
+      letter-spacing: 0.04em;
+      padding: 5px 13px;
+      border-radius: 100px;
+    }
+
+    .tag.outline {
+      background: transparent;
+      color: var(--black);
+      border: 1px solid var(--black);
+    }
+
+    /* Bio line */
+    .bio-line {
+      font-size: 0.82rem;
+      color: var(--black);
+      letter-spacing: 0.01em;
+    }
+
+    .bio-line .sep { color: var(--gray-mid); margin: 0 8px; }
+
+    /* ===== MAIN LAYOUT ===== */
+    .site-body {
+      display: flex;
+      min-height: calc(100vh - var(--header-h));
+    }
+
+    /* ===== SIDEBAR ===== */
+    .sidebar {
+      position: sticky;
+      top: var(--header-h);
+      width: var(--sidebar-w);
+      min-width: var(--sidebar-w);
+      height: calc(100vh - var(--header-h));
+      overflow-y: auto;
+      border-right: 1px solid var(--black);
+      padding: 32px 28px;
+      flex-shrink: 0;
+    }
+
+    .sidebar::-webkit-scrollbar { width: 0; }
+
+    /* Search */
+    .search-wrap {
+      margin-bottom: 32px;
+    }
+    .search-input {
+      width: 100%;
+      border: none;
+      border-bottom: 1px solid var(--black);
+      background: transparent;
+      font-family: var(--font-sans);
+      font-size: 0.82rem;
+      color: var(--black);
+      padding: 4px 0 6px;
+      outline: none;
+    }
+    .search-input::placeholder { color: var(--gray-mid); }
+
+    /* Works counter */
+    .works-counter {
+      margin-bottom: 32px;
+    }
+    .works-label {
+      font-size: 0.65rem;
+      letter-spacing: 0.12em;
+      color: var(--gray-mid);
+      margin-bottom: 4px;
+    }
+    .works-num {
+      font-size: 2.6rem;
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      line-height: 1;
+      display: inline;
+    }
+    .works-total {
+      font-size: 0.85rem;
+      color: var(--gray-mid);
+      margin-left: 4px;
+    }
+
+    /* Sidebar sections */
+    .sidebar-section {
+      margin-bottom: 28px;
+    }
+    .sidebar-section-label {
+      font-size: 0.63rem;
+      letter-spacing: 0.14em;
+      color: var(--gray-mid);
+      margin-bottom: 10px;
+      text-transform: uppercase;
+    }
+
+    .filter-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 5px 0;
+      font-size: 0.82rem;
+      cursor: pointer;
+      border-bottom: 1px solid transparent;
+      transition: color 0.12s;
+    }
+    .filter-item:hover { color: var(--black); }
+    .filter-item.active {
+      font-weight: 600;
+    }
+    .filter-item.active::before {
+      content: '—';
+      margin-right: 6px;
+      font-weight: 400;
+    }
+    .filter-count {
+      font-size: 0.75rem;
+      color: var(--gray-mid);
+    }
+
+    /* Nav links */
+    .nav-links { margin-top: 12px; }
+    .nav-link {
+      display: block;
+      font-size: 0.78rem;
+      letter-spacing: 0.05em;
+      padding: 7px 0;
+      border-bottom: 1px solid var(--gray-border);
+      color: var(--gray-mid);
+      transition: color 0.12s;
+    }
+    .nav-link:hover, .nav-link.active { color: var(--black); }
+    .nav-link.active { font-weight: 600; color: var(--black); }
+
+    /* ===== MAIN CONTENT ===== */
+    .main-content {
+      flex: 1;
+      padding: 0 40px 60px;
+      max-width: 900px;
+    }
+
+    /* Section */
+    .content-section { display: none; }
+    .content-section.visible { display: block; }
+
+    /* Project list */
+    .project-list { padding-top: 8px; }
+
+    .project-item {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      align-items: start;
+      gap: 24px;
+      padding: 22px 0;
+      border-bottom: 1px solid var(--gray-border);
+      cursor: pointer;
+      transition: opacity 0.12s;
+    }
+    .project-item:first-child { border-top: 1px solid var(--gray-border); margin-top: 24px; }
+    .project-item:hover { opacity: 0.7; }
+
+    .project-title {
+      font-size: 0.95rem;
+      line-height: 1.5;
+      font-weight: 400;
+    }
+
+    .project-title .en { display: block; }
+    .project-title .zh {
+      display: block;
+      color: var(--gray-mid);
+      font-size: 0.88rem;
+    }
+
+    .project-year {
+      font-size: 0.82rem;
+      color: var(--gray-mid);
+      white-space: nowrap;
+      padding-top: 3px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .project-meta {
+      margin-top: 5px;
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .project-tag {
+      font-size: 0.65rem;
+      letter-spacing: 0.06em;
+      color: var(--gray-mid);
+      border: 1px solid var(--gray-border);
+      padding: 2px 8px;
+    }
+
+    /* About section */
+    .about-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 60px;
+      padding-top: 32px;
+    }
+
+    @media (max-width: 700px) {
+      .about-grid { grid-template-columns: 1fr; gap: 32px; }
+    }
+
+    .about-block h3 {
+      font-size: 0.63rem;
+      letter-spacing: 0.14em;
+      color: var(--gray-mid);
+      text-transform: uppercase;
+      margin-bottom: 16px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--black);
+    }
+
+    .about-block p {
+      font-size: 0.85rem;
+      line-height: 1.8;
+      color: var(--black);
+      margin-bottom: 12px;
+    }
+
+    /* Timeline / experience */
+    .timeline-item {
+      display: grid;
+      grid-template-columns: 110px 1fr;
+      gap: 20px;
+      padding: 18px 0;
+      border-bottom: 1px solid var(--gray-border);
+    }
+    .timeline-item:first-child { border-top: 1px solid var(--gray-border); margin-top: 24px; }
+    .timeline-date {
+      font-size: 0.75rem;
+      color: var(--gray-mid);
+      letter-spacing: 0.03em;
+      padding-top: 2px;
+      font-variant-numeric: tabular-nums;
+    }
+    .timeline-body h4 {
+      font-size: 0.9rem;
+      font-weight: 600;
+      margin-bottom: 2px;
+    }
+    .timeline-body .org {
+      font-size: 0.78rem;
+      color: var(--gray-mid);
+      margin-bottom: 6px;
+    }
+    .timeline-body p {
+      font-size: 0.8rem;
+      color: #555;
+      line-height: 1.65;
+    }
+
+    /* Publications */
+    .pub-item {
+      padding: 18px 0;
+      border-bottom: 1px solid var(--gray-border);
+    }
+    .pub-item:first-child { border-top: 1px solid var(--gray-border); margin-top: 24px; }
+    .pub-item h4 {
+      font-size: 0.9rem;
+      font-weight: 500;
+      margin-bottom: 4px;
+      line-height: 1.5;
+    }
+    .pub-item .pub-meta {
+      font-size: 0.75rem;
+      color: var(--gray-mid);
+    }
+    .pub-link {
+      font-size: 0.72rem;
+      letter-spacing: 0.05em;
+      color: var(--gray-mid);
+      border-bottom: 1px solid var(--gray-border);
+      padding-bottom: 1px;
+      margin-top: 4px;
+      display: inline-block;
+    }
+    .pub-link:hover { color: var(--black); border-color: var(--black); }
+
+    /* Contact */
+    .contact-section {
+      padding-top: 32px;
+    }
+    .contact-row {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--gray-border);
+      font-size: 0.85rem;
+    }
+    .contact-label {
+      font-size: 0.65rem;
+      letter-spacing: 0.1em;
+      color: var(--gray-mid);
+      text-transform: uppercase;
+      width: 80px;
+      flex-shrink: 0;
+    }
+
+    /* ===== MOBILE ===== */
+    @media (max-width: 768px) {
+      .site-header { padding: 20px 20px 16px; }
+      .site-body { flex-direction: column; }
+      .sidebar {
+        position: relative;
+        top: 0;
+        width: 100%;
+        height: auto;
+        border-right: none;
+        border-bottom: 1px solid var(--black);
+        padding: 20px;
+      }
+      .main-content { padding: 0 20px 40px; }
+      .project-item { grid-template-columns: 1fr auto; }
+      .timeline-item { grid-template-columns: 1fr; gap: 4px; }
+      .about-grid { grid-template-columns: 1fr; }
+    }
+
+    /* ===== ANIMATIONS ===== */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .content-section.visible {
+      animation: fadeIn 0.25s ease;
+    }
+
+    /* Hidden by lang */
+    [data-lang="en"] { display: none; }
+    body.lang-en [data-lang="zh"] { display: none; }
+    body.lang-en [data-lang="en"] { display: block; }
+  </style>
+</head>
+<body>
+
+  <!-- ===== HEADER ===== -->
+  <header class="site-header">
+    <div class="header-top">
+      <div class="site-name">
+        ZINN's Database
+        <span>刘紫茵 · LIU Ziyin</span>
+      </div>
+      <button class="lang-toggle" onclick="toggleLang(this)">EN</button>
+    </div>
+
+    <div class="identity-tags">
+      <span class="tag" data-lang="zh">策展人</span>
+      <span class="tag" data-lang="en">Curator</span>
+      <span class="tag" data-lang="zh">科技艺术研究员</span>
+      <span class="tag" data-lang="en">SciArt Researcher</span>
+      <span class="tag outline" data-lang="zh">项目管理统筹</span>
+      <span class="tag outline" data-lang="en">Project Manager</span>
+      <span class="tag outline" data-lang="zh">表演者</span>
+      <span class="tag outline" data-lang="en">Performer</span>
+    </div>
+
+    <p class="bio-line" data-lang="zh">
+      在深圳市人工智能与机器人研究院从事科学与艺术的交叉实践<span class="sep">·</span>探索技术、身体与社会之间的感知边界
+    </p>
+    <p class="bio-line" data-lang="en">
+      Working at the intersection of Science, Art &amp; Technology at AIRS, Shenzhen<span class="sep">·</span>Exploring the sensory boundaries between technology, body and society
+    </p>
+  </header>
+
+  <!-- ===== BODY ===== -->
+  <div class="site-body">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <!-- Search -->
+      <div class="search-wrap">
+        <input class="search-input" type="text" placeholder="Search" id="searchInput" oninput="handleSearch(this.value)" />
+      </div>
+
+      <!-- Works counter -->
+      <div class="works-counter">
+        <div class="works-label">WORKS</div>
+        <span class="works-num" id="visibleCount">12</span>
+        <span class="works-total">/ 12</span>
+      </div>
+
+      <!-- Medium filter -->
+      <div class="sidebar-section" id="mediumSection">
+        <div class="sidebar-section-label">MEDIUM</div>
+        <div class="filter-item active" data-filter="all" onclick="filterProjects('all', this)">
+          All <span class="filter-count">12</span>
+        </div>
+        <div class="filter-item" data-filter="Curatorial" onclick="filterProjects('Curatorial', this)">
+          <span data-lang="zh">策展</span><span data-lang="en">Curatorial</span>
+          <span class="filter-count">5</span>
+        </div>
+        <div class="filter-item" data-filter="Research" onclick="filterProjects('Research', this)">
+          <span data-lang="zh">研究</span><span data-lang="en">Research</span>
+          <span class="filter-count">3</span>
+        </div>
+        <div class="filter-item" data-filter="Performance" onclick="filterProjects('Performance', this)">
+          <span data-lang="zh">演出</span><span data-lang="en">Performance</span>
+          <span class="filter-count">4</span>
+        </div>
+      </div>
+
+      <!-- Navigation -->
+      <div class="sidebar-section">
+        <div class="sidebar-section-label">PAGES</div>
+        <a class="nav-link active" onclick="showSection('works', this)" href="#">
+          <span data-lang="zh">项目</span><span data-lang="en">Works</span>
+        </a>
+        <a class="nav-link" onclick="showSection('about', this)" href="#">
+          <span data-lang="zh">关于</span><span data-lang="en">About</span>
+        </a>
+        <a class="nav-link" onclick="showSection('experience', this)" href="#">
+          <span data-lang="zh">工作履历</span><span data-lang="en">Experience</span>
+        </a>
+        <a class="nav-link" onclick="showSection('publications', this)" href="#">
+          <span data-lang="zh">学术发表</span><span data-lang="en">Publications</span>
+        </a>
+        <a class="nav-link" onclick="showSection('contact', this)" href="#">
+          <span data-lang="zh">联系</span><span data-lang="en">Contact</span>
+        </a>
+      </div>
+    </aside>
+
+    <!-- MAIN -->
+    <main class="main-content">
+
+      <!-- ===== WORKS ===== -->
+      <section class="content-section visible" id="section-works">
+        <div class="project-list" id="projectList">
+
+          <div class="project-item" data-category="Curatorial" data-title="第十届深港城市建筑双城双年展 2025UABB The 10th Bi-City Biennale of Urbanism Architecture">
+            <div class="project-title">
+              <span class="en">The 10th Bi-City Biennale of Urbanism / Architecture (2025UABB)</span>
+              <span class="zh">第十届深港城市建筑双城双年展</span>
+              <div class="project-meta">
+                <span class="project-tag">Curatorial</span>
+                <span class="project-tag" data-lang="zh">执行策展人</span>
+                <span class="project-tag" data-lang="en">Executive Curator</span>
+              </div>
+            </div>
+            <div class="project-year">2025</div>
+          </div>
+
+          <div class="project-item" data-category="Research" data-title="MIT Media Lab Shenzhen Residency 麻省理工媒体实验室深圳驻留">
+            <div class="project-title">
+              <span class="en">MIT Media Lab Shenzhen Residency &amp; Human-Computer Interaction Symposium</span>
+              <span class="zh">MIT媒体实验室深圳驻留与人机交互研讨会</span>
+              <div class="project-meta">
+                <span class="project-tag">Research</span>
+                <span class="project-tag" data-lang="zh">项目负责人</span>
+                <span class="project-tag" data-lang="en">Project Lead</span>
+              </div>
+            </div>
+            <div class="project-year">2024</div>
+          </div>
+
+          <div class="project-item" data-category="Curatorial" data-title="The Question of Questions 问题的问题 AI Robotics Art Exhibition">
+            <div class="project-title">
+              <span class="en">The Question of Questions — AI &amp; Robotics Art Exhibition</span>
+              <span class="zh">问题的问题——AI与机器人主题科技艺术展</span>
+              <div class="project-meta">
+                <span class="project-tag">Curatorial</span>
+                <span class="project-tag">AIRS · AIRSpace</span>
+              </div>
+            </div>
+            <div class="project-year">2024</div>
+          </div>
+
+          <div class="project-item" data-category="Curatorial" data-title="The Deduction of The Question 问题演绎 AIRS art exhibition">
+            <div class="project-title">
+              <span class="en">The Deduction of The Question — AI &amp; Robotics Art Exhibition</span>
+              <span class="zh">问题演绎——AI与机器人主题科技艺术展</span>
+              <div class="project-meta">
+                <span class="project-tag">Curatorial</span>
+                <span class="project-tag">AIRS · AIRSpace</span>
+              </div>
+            </div>
+            <div class="project-year">2023</div>
+          </div>
+
+          <div class="project-item" data-category="Curatorial" data-title="Shenzhen Natural History Museum 深圳自然博物馆 Sports Museum 体育博物馆">
+            <div class="project-title">
+              <span class="en">Urban Public Themed Museums — Exhibition Content &amp; Display Design</span>
+              <span class="zh">城市大型公共主题场馆策展策划项目</span>
+              <div class="project-meta">
+                <span class="project-tag" data-lang="zh">深圳自然博物馆 / 体育博物馆</span>
+                <span class="project-tag" data-lang="en">Shenzhen Natural History Museum</span>
+              </div>
+            </div>
+            <div class="project-year">2022–23</div>
+          </div>
+
+          <div class="project-item" data-category="Research" data-title="ICRA 2025 Arts in Robotics conference paper robotics">
+            <div class="project-title">
+              <span class="en">2025 ICRA — Arts in Robotics Exhibition</span>
+              <span class="zh">2025 ICRA 机器人艺术展览（顶会）</span>
+              <div class="project-meta">
+                <span class="project-tag">Research</span>
+                <span class="project-tag" data-lang="zh">5篇论文入选，4篇第一作者</span>
+                <span class="project-tag" data-lang="en">5 papers accepted, 4 as first author</span>
+              </div>
+            </div>
+            <div class="project-year">2025</div>
+          </div>
+
+          <div class="project-item" data-category="Research" data-title="SciArt Co-Lab AIRS science art laboratory founding member">
+            <div class="project-title">
+              <span class="en">SciArt Co-Lab — Founding &amp; Platform Building</span>
+              <span class="zh">科艺联合实验室平台创建</span>
+              <div class="project-meta">
+                <span class="project-tag">Research</span>
+                <span class="project-tag">AIRS, Shenzhen</span>
+              </div>
+            </div>
+            <div class="project-year">2023–</div>
+          </div>
+
+          <div class="project-item" data-category="Performance" data-title="At Land At Sea 陆上海上 contemporary performance film dance Shekou Theatre Festival">
+            <div class="project-title">
+              <span class="en">At Land At Sea — Contemporary Performance &amp; Experimental Film</span>
+              <span class="zh">陆上海上——当代表演与实验影像</span>
+              <div class="project-meta">
+                <span class="project-tag">Performance</span>
+                <span class="project-tag" data-lang="zh">蛇口戏剧节</span>
+                <span class="project-tag" data-lang="en">Shekou Theatre Festival</span>
+              </div>
+            </div>
+            <div class="project-year">2022</div>
+          </div>
+
+          <div class="project-item" data-category="Performance" data-title="Unwired Shenzhen Fringe Festival dance performance">
+            <div class="project-title">
+              <span class="en">Unwired — Contemporary Dance Performance</span>
+              <span class="zh">解绑——当代舞蹈、新空间戏剧</span>
+              <div class="project-meta">
+                <span class="project-tag">Performance</span>
+                <span class="project-tag" data-lang="zh">深圳艺穗节</span>
+                <span class="project-tag" data-lang="en">Shenzhen Fringe Festival</span>
+              </div>
+            </div>
+            <div class="project-year">2022</div>
+          </div>
+
+          <div class="project-item" data-category="Performance" data-title="Round Square Dance 圆方广场舞 community dance Cloud Art Museum Shenzhen">
+            <div class="project-title">
+              <span class="en">Round Square Dance — Community Co-creation Performance</span>
+              <span class="zh">圆方广场舞——社区共创当代舞蹈</span>
+              <div class="project-meta">
+                <span class="project-tag">Performance</span>
+                <span class="project-tag" data-lang="zh">深圳云美术馆</span>
+                <span class="project-tag" data-lang="en">Cloud Art Museum, Shenzhen</span>
+              </div>
+            </div>
+            <div class="project-year">2022</div>
+          </div>
+
+          <div class="project-item" data-category="Performance" data-title="KSANA 一念之间 photography exhibition community Cloud Art Museum">
+            <div class="project-title">
+              <span class="en">KSANA 一念之间 — Solo Photography Exhibition &amp; Community Project</span>
+              <span class="zh">一念之间——个人摄影展与社区居民摄影展</span>
+              <div class="project-meta">
+                <span class="project-tag">Performance</span>
+                <span class="project-tag" data-lang="zh">深圳云美术馆</span>
+                <span class="project-tag" data-lang="en">Cloud Art Museum, Shenzhen</span>
+              </div>
+            </div>
+            <div class="project-year">2021</div>
+          </div>
+
+          <div class="project-item" data-category="Curatorial" data-title="API Experimental Art Shenzhen media department head">
+            <div class="project-title">
+              <span class="en">API Experimental Art — Media &amp; Content Production</span>
+              <span class="zh">API实验艺术——媒体部负责人</span>
+              <div class="project-meta">
+                <span class="project-tag">Curatorial</span>
+                <span class="project-tag" data-lang="zh">深圳</span>
+                <span class="project-tag" data-lang="en">Shenzhen</span>
+              </div>
+            </div>
+            <div class="project-year">2020–22</div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- ===== ABOUT ===== -->
+      <section class="content-section" id="section-about">
+        <div class="about-grid">
+          <div class="about-block">
+            <h3 data-lang="zh">关于</h3>
+            <h3 data-lang="en">About</h3>
+            <p data-lang="zh">
+              刘紫茵（ZINN），艺术策展人与研究员，现任深圳市人工智能与机器人研究院（AIRS）科学+艺术联合实验室主创。
+            </p>
+            <p data-lang="en">
+              ZINN (LIU Ziyin) is an art curator and researcher, currently serving as Founding Member of SciArt Co-Lab at the Institute of Artificial Intelligence and Robotics for Society (AIRS), Shenzhen.
+            </p>
+            <p data-lang="zh">
+              她的实践游走于科技、艺术与社会之间，关注人机交互、身体感知与未来叙事。策展之外，她亦是一位当代表演者——在舞蹈、戏剧与实验影像中探索身体与语言的边界。
+            </p>
+            <p data-lang="en">
+              Her practice navigates the intersections of science, art and society, with a focus on human-machine interaction, bodily perception, and speculative futures. Beyond curation, she is also a contemporary performer — exploring the boundaries of body and language through dance, theatre, and experimental film.
+            </p>
+          </div>
+
+          <div class="about-block">
+            <h3 data-lang="zh">教育背景</h3>
+            <h3 data-lang="en">Education</h3>
+            <p data-lang="zh">
+              <strong>英国莱斯特大学</strong><br />
+              艺术管理 · 博物馆学，硕士<br />
+              <span style="color:var(--gray-mid);font-size:0.78rem">2018 – 2020 · 优等成绩毕业</span>
+            </p>
+            <p data-lang="en">
+              <strong>University of Leicester, UK</strong><br />
+              Arts Management &amp; Museum Studies, MA<br />
+              <span style="color:var(--gray-mid);font-size:0.78rem">2018 – 2020 · Distinction</span>
+            </p>
+            <p data-lang="zh" style="margin-top:16px">
+              <strong>华南师范大学</strong><br />
+              英语语言文学，本科<br />
+              <span style="color:var(--gray-mid);font-size:0.78rem">2012 – 2016</span>
+            </p>
+            <p data-lang="en" style="margin-top:16px">
+              <strong>South China Normal University</strong><br />
+              English Language &amp; Literature, BA<br />
+              <span style="color:var(--gray-mid);font-size:0.78rem">2012 – 2016</span>
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== EXPERIENCE ===== -->
+      <section class="content-section" id="section-experience">
+
+        <div class="timeline-item">
+          <div class="timeline-date">2023 –<br/>Present</div>
+          <div class="timeline-body">
+            <h4 data-lang="zh">主创 | 科学+艺术联合实验室</h4>
+            <h4 data-lang="en">Founding Member | SciArt Co-Lab</h4>
+            <div class="org">深圳市人工智能与机器人研究院 (AIRS)</div>
+            <p data-lang="zh">院内展览项目负责人，统筹管理科技艺术展览项目的策划执行。在项目管理及科艺平台整体建设与品牌塑造中发挥核心作用，涵盖展览与活动策划、学术项目、国际合作、媒体拓展及筹资运营等。</p>
+            <p data-lang="en">Lead curation and execution of art exhibitions. Play a key role in project management and SciArt Co-Lab's overall platform building, including exhibitions, academic programs, global collaborations, media promotion, and fundraising.</p>
+          </div>
+        </div>
+
+        <div class="timeline-item">
+          <div class="timeline-date">Sep 2022 –<br/>Nov 2023</div>
+          <div class="timeline-body">
+            <h4 data-lang="zh">高级策划 · 项目经理</h4>
+            <h4 data-lang="en">Senior Curator &amp; Project Manager</h4>
+            <div class="org">深圳市艺博堂环境艺术工程设计有限公司 (E.B.T Art Design)</div>
+            <p data-lang="zh">制定策展概念、展览规划与内容设计，涵盖各类主题展览与主题馆。与设计师及多媒体制作团队协作，统筹监督项目全流程落地实施。</p>
+            <p data-lang="en">Developed creative concepts, exhibition planning and content design for various themed exhibitions and museums. Collaborated with designers and multimedia production teams to oversee project execution.</p>
+          </div>
+        </div>
+
+        <div class="timeline-item">
+          <div class="timeline-date">Nov 2020 –<br/>Sep 2022</div>
+          <div class="timeline-body">
+            <h4 data-lang="zh">媒体部负责人</h4>
+            <h4 data-lang="en">Head of Media Department</h4>
+            <div class="org">API实验艺术 · 深圳</div>
+            <p data-lang="zh">统筹媒体内容创作，包括策划、脚本撰写、拍摄、剪辑及艺术家访谈。制定媒体传播策略，提升机构整体传播力与影响力。</p>
+            <p data-lang="en">Led media content creation including scripting, filming, editing, and artist interviews. Defined media strategy and content themes for the department.</p>
+          </div>
+        </div>
+
+        <div class="timeline-item">
+          <div class="timeline-date">Apr 2019 –<br/>Jan 2020</div>
+          <div class="timeline-body">
+            <h4 data-lang="zh">运营经理（兼职）</h4>
+            <h4 data-lang="en">Duty Manager (part-time)</h4>
+            <div class="org">Attenborough Arts Centre, Leicester, UK</div>
+            <p data-lang="zh">负责艺术中心日常运营管理，协调跨部门团队工作。为艺术家演出及公共文化活动提供支持。</p>
+            <p data-lang="en">Managed art center's operations, supervising teams across various departments. Supported artists in performances and public cultural events.</p>
+          </div>
+        </div>
+
+        <div class="timeline-item">
+          <div class="timeline-date">Jun – Aug<br/>2019</div>
+          <div class="timeline-body">
+            <h4 data-lang="zh">美术馆助理（实习）</h4>
+            <h4 data-lang="en">Museum Assistant (Intern)</h4>
+            <div class="org">Dulwich Picture Gallery, London, UK</div>
+            <p data-lang="zh">协助策展筹备、展览运营及公共教育项目。</p>
+            <p data-lang="en">Assisted with curatorial planning, exhibition management, and public programs.</p>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- ===== PUBLICATIONS ===== -->
+      <section class="content-section" id="section-publications">
+
+        <div class="pub-item">
+          <h4>2025 ICRA — Arts in Robotics Exhibition</h4>
+          <div class="pub-meta" data-lang="zh">国际机器人与自动化会议（顶会）· 2025年5月 · 5篇论文入选，其中4篇为第一作者</div>
+          <div class="pub-meta" data-lang="en">IEEE International Conference on Robotics and Automation · May 2025 · 5 proposal papers accepted, 4 as first author</div>
+          <a class="pub-link" href="https://roboticart.org/icra2025/" target="_blank">roboticart.org/icra2025/</a>
+        </div>
+
+        <div class="pub-item">
+          <h4 data-lang="zh">问题的问题——AI与机器人主题科技艺术展</h4>
+          <h4 data-lang="en">The Question of Questions — AI &amp; Robotics Art Exhibition</h4>
+          <div class="pub-meta">AIRSpace · AIRS · 2024</div>
+          <a class="pub-link" href="https://airs.cuhk.edu.cn/article/1273" target="_blank">airs.cuhk.edu.cn/article/1273</a>
+        </div>
+
+        <div class="pub-item">
+          <h4 data-lang="zh">问题演绎——AI与机器人主题科技艺术展</h4>
+          <h4 data-lang="en">The Deduction of The Question — AI &amp; Robotics Art Exhibition</h4>
+          <div class="pub-meta">AIRSpace · AIRS · 2023</div>
+          <a class="pub-link" href="https://airs.cuhk.edu.cn/article/998" target="_blank">airs.cuhk.edu.cn/article/998</a>
+        </div>
+
+        <div class="pub-item">
+          <h4 data-lang="zh">MIT媒体实验室深圳驻留与研究项目</h4>
+          <h4 data-lang="en">MIT Media Lab — Research at Scale, Shenzhen Residency</h4>
+          <div class="pub-meta">MIT Media Lab · 2024</div>
+          <a class="pub-link" href="https://media.mit.edu/posts/research-at-scale" target="_blank">media.mit.edu/posts/research-at-scale</a>
+        </div>
+
+        <div class="pub-item">
+          <h4 data-lang="zh">At Land At Sea — 2025UABB第十届深港城市建筑双城双年展</h4>
+          <h4 data-lang="en">2025 UABB — 10th Bi-City Biennale of Urbanism/Architecture</h4>
+          <div class="pub-meta" data-lang="zh">执行策展人 · 城市剧场：建筑×艺术×科学 · 2025</div>
+          <div class="pub-meta" data-lang="en">Executive Curator · Urban Theatre: Architecture × Art × Science · 2025</div>
+          <a class="pub-link" href="https://www.uabb-sz.com/en" target="_blank">uabb-sz.com</a>
+        </div>
+
+        <div class="pub-item">
+          <h4 data-lang="zh">陆上海上 At Land At Sea — 入选国际舞蹈影像节</h4>
+          <h4 data-lang="en">At Land At Sea — Selected by International Dance Film Festivals</h4>
+          <div class="pub-meta" data-lang="zh">2023 女性舞蹈国际舞蹈影像节 · 2024 Choreo Dance Film Festival 伦敦展映</div>
+          <div class="pub-meta" data-lang="en">2023 Women in Dance Int'l Dance Film Festival · 2024 Choreo Dance Film Festival, London</div>
+        </div>
+
+      </section>
+
+      <!-- ===== CONTACT ===== -->
+      <section class="content-section" id="section-contact">
+        <div class="contact-section">
+          <div class="contact-row">
+            <span class="contact-label">EMAIL</span>
+            <a href="mailto:liuziyin@cuhk.edu.cn">liuziyin@cuhk.edu.cn</a>
+          </div>
+          <div class="contact-row">
+            <span class="contact-label">PHONE</span>
+            <span>+86 198 0644 8689</span>
+          </div>
+          <div class="contact-row">
+            <span class="contact-label">LOCATION</span>
+            <span data-lang="zh">中国深圳</span>
+            <span data-lang="en">Shenzhen, China</span>
+          </div>
+          <div class="contact-row">
+            <span class="contact-label">INSTITUTION</span>
+            <span>AIRS · 深圳市人工智能与机器人研究院</span>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <script>
+    // ===== LANGUAGE TOGGLE =====
+    let currentLang = 'zh';
+
+    function toggleLang(btn) {
+      if (currentLang === 'zh') {
+        currentLang = 'en';
+        document.body.classList.add('lang-en');
+        btn.textContent = '中';
+      } else {
+        currentLang = 'zh';
+        document.body.classList.remove('lang-en');
+        btn.textContent = 'EN';
+      }
+    }
+
+    // ===== SECTION NAV =====
+    function showSection(id, linkEl) {
+      document.querySelectorAll('.content-section').forEach(s => s.classList.remove('visible'));
+      document.getElementById('section-' + id).classList.add('visible');
+      document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+      if (linkEl) linkEl.classList.add('active');
+
+      // Show/hide medium filter only on works
+      const mediumSection = document.getElementById('mediumSection');
+      mediumSection.style.display = id === 'works' ? '' : 'none';
+    }
+
+    // ===== FILTER =====
+    let currentFilter = 'all';
+
+    function filterProjects(category, el) {
+      currentFilter = category;
+
+      document.querySelectorAll('.filter-item').forEach(item => {
+        item.classList.toggle('active', item.dataset.filter === category);
+      });
+
+      applyFilters();
+    }
+
+    function applyFilters() {
+      const search = document.getElementById('searchInput').value.toLowerCase();
+      const items = document.querySelectorAll('.project-item');
+      let visible = 0;
+
+      items.forEach(item => {
+        const catMatch = currentFilter === 'all' || item.dataset.category === currentFilter;
+        const searchMatch = !search || item.dataset.title.toLowerCase().includes(search) || item.textContent.toLowerCase().includes(search);
+        const show = catMatch && searchMatch;
+        item.style.display = show ? '' : 'none';
+        if (show) visible++;
+      });
+
+      document.getElementById('visibleCount').textContent = visible;
+    }
+
+    function handleSearch(val) {
+      applyFilters();
+    }
+
+    // prevent default on nav links
+    document.querySelectorAll('.nav-link').forEach(link => {
+      link.addEventListener('click', e => e.preventDefault());
+    });
+  </script>
+</body>
+</html>
